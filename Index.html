@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoon Glam Studio</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-size: 1.8rem;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        /* Character Canvas Area */
+        .stage {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            background: linear-gradient(to bottom, #e0c3fc 0%, #8ec5fc 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 200px;
+            height: 250px;
+        }
+
+        /* Cartoon Face Parts */
+        .face-base {
+            position: absolute;
+            top: 40px;
+            left: 30px;
+            width: 140px;
+            height: 160px;
+            background-color: #ffdbac;
+            border-radius: 50% 50% 45% 45%;
+            border: 3px solid #333;
+            transition: background-color 0.3s;
+        }
+
+        .eyes {
+            position: absolute;
+            top: 90px;
+            left: 45px;
+            width: 110px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .eye {
+            width: 22px;
+            height: 26px;
+            background: #333;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .eyeshadow {
+            position: absolute;
+            top: 83px;
+            left: 40px;
+            width: 120px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .shadow-spot {
+            width: 32px;
+            height: 15px;
+            background: transparent;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .blush {
+            position: absolute;
+            top: 115px;
+            left: 38px;
+            width: 124px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .blush-spot {
+            width: 25px;
+            height: 15px;
+            background: transparent;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .mouth {
+            position: absolute;
+            top: 145px;
+            left: 75px;
+            width: 40px;
+            height: 15px;
+            background: #d84315;
+            border: 2px solid #333;
+            border-radius: 0 0 20px 20px;
+            transition: background 0.3s, height 0.3s;
+        }
+
+        .hair {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 160px;
+            height: 80px;
+            background: #5d4037;
+            border: 3px solid #333;
+            border-radius: 80px 80px 20px 20px;
+            z-index: 2;
+            transition: background 0.3s, border-radius 0.3s;
+        }
+
+        /* Controls Panel */
+        .controls {
+            padding: 20px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .option-btn {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: #ff6b81;
+            background: #fff0f3;
+        }
+
+        .option-btn.active {
+            border-color: #ff6b81;
+            background: #ff6b81;
+            color: white;
+            font-weight: bold;
+        }
+
+        .reset-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>✨ Cartoon Glam & Makeover Studio ✨</h1>
+    </header>
+
+    <div class="container">
+        <!-- Cartoon Character Stage -->
+        <div class="stage">
+            <div class="avatar-container">
+                <div class="hair" id="hairStyle"></div>
+                <div class="face-base" id="faceSkin"></div>
+                <div class="eyeshadow">
+                    <div class="shadow-spot" id="shadowLeft"></div>
+                    <div class="shadow-spot" id="shadowRight"></div>
+                </div>
+                <div class="eyes">
+                    <div class="eye"></div>
+                    <div class="eye"></div>
+                </div>
+                <div class="blush">
+                    <div class="blush-spot" id="blushLeft"></div>
+                    <div class="blush-spot" id="blushRight"></div>
+                </div>
+                <div class="mouth" id="lipstickColor"></div>
+            </div>
+        </div>
+
+        <!-- Customization Controls -->
+        <div class="controls">
+            <!-- Skin Tone -->
+            <div class="control-group">
+                <label>Skin Tone</label>
+                <div class="btn-row">
+                    <button class="option-btn active" onclick="setSkin('#ffdbac', this)">Fair</button>
+                    <button class="option-btn" onclick="setSkin('#e0ac69', this)">Medium</button>
+                    <button class="option-btn" onclick="setSkin('#8d5524', this)">Deep</button>
+                </div>
+            </div>
+
+            <!-- Hair Style & Color -->
+            <div class="control-group">
+                <label>Hair Style & Color</label>
+                <div class="btn-row">
+                    <button class="option-btn active" onclick="setHair('#5d4037', '80px 80px 20px 20px', this)">Brown Bob</button>
+                    <button class="option-btn" onclick="setHair('#111111', '90px 90px 10px 10px', this)">Dark Spiky</button>
+                    <button class="option-btn" onclick="setHair('#ffeb3b', '60px 60px 40px 40px', this)">Blonde Waves</button>
+                    <button class="option-btn" onclick="setHair('#e91e63', '100px 20px 20px 20px', this)">Pink Ponytail</button>
+                </div>
+            </div>
+
+            <!-- Eye Shadow / Makeup -->
+            <div class="control-group">
+                <label>Eye Shadow</label>
+                <div class="btn-row">
+                    <button class="option-btn active" onclick="setEyeshadow('transparent', this)">None</button>
+                    <button class="option-btn" onclick="setEyeshadow('rgba(0, 229, 255, 0.4)', this)">Aqua Glow</button>
+                    <button class="option-btn" onclick="setEyeshadow('rgba(156, 39, 176, 0.4)', this)">Purple Spark</button>
+                    <button class="option-btn" onclick="setEyeshadow('rgba(255, 152, 0, 0.4)', this)">Sunset Gold</button>
+                </div>
+            </div>
+
+            <!-- Blush -->
+            <div class="control-group">
+                <label>Blush</label>
+                <div class="btn-row">
+                    <button class="option-btn active" onclick="setBlush('transparent', this)">None</button>
+                    <button class="option-btn" onclick="setBlush('rgba(255, 105, 180, 0.5)', this)">Soft Pink</button>
+                    <button class="option-btn" onclick="setBlush('rgba(255, 87, 34, 0.5)', this)">Peach Glow</button>
+                </div>
+            </div>
+
+            <!-- Lipstick -->
+            <div class="control-group">
+                <label>Lipstick</label>
+                <div class="btn-row">
+                    <button class="option-btn active" onclick="setLipstick('#d84315', this)">Classic Red</button>
+                    <button class="option-btn" onclick="setLipstick('#e91e63', this)">Hot Pink</button>
+                    <button class="option-btn" onclick="setLipstick('#9c27b0', this)">Berry Violet</button>
+                    <button class="option-btn" onclick="setLipstick('#ff9800', this)">Coral Peach</button>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetStudio()">Reset Look</button>
+        </div>
+    </div>
+
+    <script>
+        function updateActiveButton(buttonElement) {
+            const row = buttonElement.parentElement;
+            row.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+        }
+
+        function setSkin(color, btn) {
+            document.getElementById('faceSkin').style.backgroundColor = color;
+            updateActiveButton(btn);
+        }
+
+        function setHair(color, borderRadius, btn) {
+            const hair = document.getElementById('hairStyle');
+            hair.style.backgroundColor = color;
+            hair.style.borderRadius = borderRadius;
+            updateActiveButton(btn);
+        }
+
+        function setEyeshadow(color, btn) {
+            document.getElementById('shadowLeft').style.backgroundColor = color;
+            document.getElementById('shadowRight').style.backgroundColor = color;
+            updateActiveButton(btn);
+        }
+
+        function setBlush(color, btn) {
+            document.getElementById('blushLeft').style.backgroundColor = color;
+            document.getElementById('blushRight').style.backgroundColor = color;
+            updateActiveButton(btn);
+        }
+
+        function setLipstick(color, btn) {
+            document.getElementById('lipstickColor').style.backgroundColor = color;
+            updateActiveButton(btn);
+        }
+
+        function resetStudio() {
+            location.reload();
+        }
+    </script>
+</body>
+  </html>
+  
