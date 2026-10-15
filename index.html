@@ -356,6 +356,326 @@
             location.reload();
         }
     </script>
+    <!-- ================================================================= -->
+<!-- 🚀 RUST THEME, AUDIO FX, FIREWORKS & SAVE SYSTEM (300+ LINES) -->
+<!-- ================================================================= -->
+<style>
+    /* Rust & Copper Theme Styles */
+    .rust-theme-active {
+        background: linear-gradient(135deg, #3d2314 0%, #b85d30 50%, #d48351 100% !important);
+        color: #ffecd2 !important;
+    }
+    .rust-container {
+        border: 3px solid #b85d30 !important;
+        box-shadow: 0 15px 35px rgba(184, 93, 48, 0.4) !important;
+    }
+    
+    /* Advanced Extension Panel */
+    .power-studio-panel {
+        margin-top: 15px;
+        background: #111827;
+        border: 2px solid #374151;
+        border-radius: 14px;
+        padding: 15px;
+        color: #fff;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .power-studio-panel h3 {
+        color: #f6ad55;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #374151;
+        padding-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .power-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .power-btn {
+        padding: 8px 10px;
+        background: #1f2937;
+        color: #f3f4f6;
+        border: 1px solid #4b5563;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+    .power-btn:hover {
+        background: #b85d30;
+        border-color: #d48351;
+        transform: translateY(-2px);
+    }
+    .power-btn.active-rust {
+        background: #b85d30;
+        color: white;
+        border-color: #ffecd2;
+    }
+
+    /* Sticker & Accessory Overlays */
+    .sticker-overlay {
+        position: absolute;
+        font-size: 1.8rem;
+        z-index: 15;
+        pointer-events: none;
+        animation: floatSticker 3s infinite ease-in-out;
+        display: none;
+    }
+    @keyframes floatSticker {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-5px) rotate(5deg); }
+    }
+
+    /* Fireworks Canvas Overlay */
+    #fireworksCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 999;
+        display: none;
+    }
+</style>
+
+<!-- आतिशबाजी के लिए फुलस्क्रीन कैनवास -->
+<canvas id="fireworksCanvas"></canvas>
+
+<!-- स्टिकर और एक्स्ट्रा लेयर्स -->
+<div id="stickerWand" class="sticker-overlay" style="top: 120px; left: 10px;">🪄</div>
+<div id="stickerNecklace" class="sticker-overlay" style="top: 210px; left: 75px;">💎</div>
+<div id="stickerButterfly" class="sticker-overlay" style="top: 35px; right: 15px;">🦋</div>
+
+<!-- मास्टर पावर अपग्रेड पैनल -->
+<div class="power-studio-panel" id="powerPanel">
+    <h3>
+        <span>⚙️ Rust & Pro Studio Suite (v3.0)</span>
+        <span style="font-size: 0.7rem; color: #10b981;" id="saveStatus">● Ready</span>
+    </h3>
+
+    <!-- थीम और रस्ट कंट्रोल -->
+    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 5px;">🎨 स्पेशल मेटैलिक रस्ट थीम</div>
+    <div class="power-grid" style="grid-template-columns: 1fr;">
+        <button class="power-btn" onclick="toggleRustTheme(this)" id="rustThemeBtn">⚙️ Rust & Copper Industrial Theme चालू करें</button>
+    </div>
+
+    <!-- जादुई स्टिकर्स और एसेसरीज -->
+    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 5px;">💎 रॉयल एक्सेसरी स्टिकर्स</div>
+    <div class="power-grid">
+        <button class="power-btn" onclick="toggleSticker('stickerWand', this)">🪄 मैजिक वंड</button>
+        <button class="power-btn" onclick="toggleSticker('stickerNecklace', this)">💎 डायमंड नेकलेस</button>
+        <button class="power-btn" onclick="toggleSticker('stickerButterfly', this)">🦋 बटरफ्लाइ</button>
+        <button class="power-btn" onclick="clearAllStickers()">❌ सभी स्टिकर हटाएं</button>
+    </div>
+
+    <!-- डेटा सेव और साउंड सिस्टम -->
+    <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 5px;">💾 स्टोरेज और एनिमेशन इफेक्ट्स</div>
+    <div class="power-grid">
+        <button class="power-btn" onclick="saveMyDesign()">📥 लुक सेव करें</button>
+        <button class="power-btn" onclick="loadMyDesign()">📂 लुक लोड करें</button>
+        <button class="power-btn" onclick="triggerFireworks()" style="grid-column: span 2; background: #059669; color: white;">🎆 मैजिक फायरवर्क्स सेलिब्रेशन!</button>
+    </div>
+</div>
+
+
+    // 1. Web Audio API Sound Generator (बिना किसी फाइल के साउंड बजाना)
+    function playSound(type) {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'magic') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16);
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        } catch (e) {
+            console.log("Audio not supported or blocked");
+        }
+    }
+
+    // सभी बटन्स पर ऑटोमेटिक क्लिक साउंड जोड़ना
+    document.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            playSound('click');
+        }
+    });
+
+    // 2. Rust & Copper Theme Toggle
+    let isRustActive = false;
+    function toggleRustTheme(btn) {
+        isRustActive = !isRustActive;
+        const body = document.body;
+        const container = document.querySelector('.container');
+        const panel = document.getElementById('powerPanel');
+
+        if (isRustActive) {
+            body.classList.add('rust-theme-active');
+            if(container) container.classList.add('rust-container');
+            panel.style.background = '#2c1810';
+            panel.style.borderColor = '#b85d30';
+            btn.classList.add('active-rust');
+            btn.innerText = "⚙️ Rust Theme बंद करें";
+            playSound('magic');
+        } else {
+            body.classList.remove('rust-theme-active');
+            if(container) container.classList.remove('rust-container');
+            panel.style.background = '#111827';
+            panel.style.borderColor = '#374151';
+            btn.classList.remove('active-rust');
+            btn.innerText = "⚙️ Rust & Copper Industrial Theme चालू करें";
+        }
+    }
+
+    // 3. Sticking & Accessories Control
+    function toggleSticker(id, btn) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                btn.classList.remove('active-rust');
+            } else {
+                el.style.display = 'block';
+                btn.classList.add('active-rust');
+                playSound('magic');
+            }
+        }
+    }
+
+    function clearAllStickers() {
+        ['stickerWand', 'stickerNecklace', 'stickerButterfly'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        document.querySelectorAll('.power-btn').forEach(b => {
+            if(b.innerText.includes('🪄') || b.innerText.includes('💎') || b.innerText.includes('🦋')) {
+                b.classList.remove('active-rust');
+            }
+        });
+    }
+
+    // 4. LocalStorage Save & Load System
+    function saveMyDesign() {
+        try {
+            const data = {
+                theme: document.querySelector('.option-btn.active')?.innerText || 'default',
+                rust: isRustActive
+            };
+            localStorage.setItem('princessStudioSave', JSON.stringify(data));
+            const status = document.getElementById('saveStatus');
+            status.innerText = "● Saved Successfully!";
+            status.style.color = "#34d399";
+            playSound('magic');
+            setTimeout(() => { status.innerText = "● Ready"; }, 3000);
+        } catch (e) {
+            alert("Save failed!");
+        }
+    }
+
+    function loadMyDesign() {
+        try {
+            const saved = localStorage.getItem('princessStudioSave');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.rust && !isRustActive) {
+                    toggleRustTheme(document.getElementById('rustThemeBtn'));
+                }
+                const status = document.getElementById('saveStatus');
+                status.innerText = "● Loaded!";
+                status.style.color = "#60a5fa";
+                playSound('magic');
+                setTimeout(() => { status.innerText = "● Ready"; }, 3000);
+            } else {
+                alert("कोई सेव किया हुआ लुक नहीं मिला!");
+            }
+        } catch (e) {
+            alert("Load failed!");
+        }
+    }
+
+    // 5. Advanced Fireworks Animation Engine
+    function triggerFireworks() {
+        playSound('magic');
+        const canvas = document.getElementById('fireworksCanvas');
+        canvas.style.display = 'block';
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#ff6b81', '#ffc048', '#ff4757', '#2ed573', '#1e90ff', '#b85d30', '#ffd700'];
+
+        for (let i = 0; i < 120; i++) {
+            particles.push({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
+                radius: Math.random() * 4 + 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                alpha: 1,
+                decay: Math.random() * 0.015 + 0.01
+            });
+        }
+
+        function animateFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let activeParticles = 0;
+
+            particles.forEach(p => {
+                if (p.alpha > 0) {
+                    activeParticles++;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15; // Gravity
+                    p.alpha -= p.decay;
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+
+            if (activeParticles > 0) {
+                requestAnimationFrame(animateFireworks);
+            } else {
+                canvas.style.display = 'none';
+            }
+        }
+
+        animateFireworks();
+    }
+        </script/>
+<!-- ================================================================= -->
+    
 </body>
   </html>
   
